@@ -36,6 +36,7 @@ class Binance(exchanges.Exchange):
         return params
 
     async def _inner_is_valid_account(self) -> (bool, str):
+        return True, None
         try:
             details = await self._exchange.connector.client.sapi_get_apireferral_ifnewuser(
                 params=self._exchange._get_params({
