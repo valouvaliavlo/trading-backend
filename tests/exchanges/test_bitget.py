@@ -13,23 +13,23 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
-VERSION = "1.0.14"
-PROJECT_NAME = "trading-backend"
+import mock
+import pytest
+import ccxt.async_support
+import trading_backend.exchanges as exchanges
+import tests.util.create_order_tests as create_order_tests
+from tests import bitget_exchange
 
-from trading_backend import exchange_factory
-from trading_backend.exchange_factory import (
-    create_exchange_backend,
-    is_sponsoring,
-)
-from trading_backend import errors
-from trading_backend.errors import (
-    TimeSyncError,
-    ExchangeAuthError,
-)
 
-__all__ = [
-    "create_exchange_backend",
-    "is_sponsoring",
-    "TimeSyncError",
-    "ExchangeAuthError",
-]
+def test_get_name(bitget_exchange):
+    assert exchanges.Bitget(bitget_exchange).get_name() == ccxt.async_support.bitget().name.lower()
+
+
+@pytest.mark.asyncio
+async def test_get_orders_parameters(bitget_exchange):
+    exchange = exchanges.Bitget(bitget_exchange)
+    await create_order_tests.create_order_mocked_test_args(
+        exchange,
+        exchange_private_post_order_method_name="privateSpotPostTradeOrders",
+        exchange_request_referral_key="clientOrderId",
+        should_contains=True)
