@@ -39,25 +39,4 @@ class Binance(exchanges.Exchange):
 
     async def _inner_is_valid_account(self) -> (bool, str):
         details = None
-        try:
-            details = await self._exchange.connector.client.sapi_get_apireferral_ifnewuser(
-                params=self._exchange._get_params({
-                    "apiAgentCode": self._get_id()
-                })
-            )
-            if not details.get("rebateWorking", False):
-                ref_id = details.get("referrerId", None)
-                if ref_id is not None:
-                    return False, f"This account has a referral id equal to {ref_id} " \
-                                  f"which is incompatible ({self.REF_ID} as referral id or no referral id is required)"
-                return False, f"This account is incompatible, details: {details}. Please report this message to " \
-                              f"admins for investigation. " \
-                              f"An account with {self.REF_ID} as referral id or no referral id is required."
-            if not details.get("ifNewUser", False):
-                return False, "Binance requires accounts that were created after july 1st 2021, " \
-                              "this account is too old."
-        except AttributeError:
-            if isinstance(details, aiohttp.streams.StreamReader):
-                return False, "Error when fetching exchange data (unreadable response)"
-            return False, "Invalid request parameters"
         return True, None
