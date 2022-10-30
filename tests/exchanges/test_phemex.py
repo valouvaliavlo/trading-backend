@@ -13,25 +13,25 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
-import mock
 import pytest
 import ccxt.async_support
 import trading_backend.exchanges as exchanges
 import tests.util.create_order_tests as create_order_tests
-from tests import okx_exchange
+from tests import phemex_exchange
 
 
-def test_get_name(okx_exchange):
-    assert exchanges.OKX(okx_exchange).get_name() == ccxt.async_support.okx().name.lower()
+def test_get_name(phemex_exchange):
+    assert exchanges.Phemex(phemex_exchange).get_name() == ccxt.async_support.phemex().name.lower()
 
 
 @pytest.mark.asyncio
-async def test_get_orders_parameters(okx_exchange):
-    exchange = exchanges.OKX(okx_exchange)
+async def test_get_orders_parameters(phemex_exchange):
+    exchange = exchanges.Phemex(phemex_exchange)
+    # stopPxEp not in ccxt "market" which is used as default value, provide it in mock
     await create_order_tests.create_order_mocked_test_args(
         exchange,
-        exchange_private_post_order_method_name="privatePostTradeBatchOrders",
-        exchange_request_referral_key="clOrdId",
+        exchange_private_post_order_method_name="privatePostSpotOrders",
+        exchange_request_referral_key="clOrdID",
         should_contains=True,
-        result_is_list=True,
-        post_order_mock_return_value={'data': [{}]})
+        result_is_list=False,
+        post_order_mock_return_value={'data': {'stopPxEp': 0}})

@@ -13,29 +13,25 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
+import aiohttp.streams
+
 import trading_backend.exchanges as exchanges
 
 
-class Bybit(exchanges.Exchange):
-    SPOT_ID = "octobot"
-    MARGIN_ID = "octobot"
-    FUTURE_ID = "octobot"
+class Phemex(exchanges.Exchange):
+    SPOT_ID = "Octobot"
+    MARGIN_ID = None
+    FUTURE_ID = "Octobot"
     IS_SPONSORING = True
-    HEADER_SPOT_KEY = "agentSource"
-    HEADER_FUTURE_KEY = "Referer"
 
     @classmethod
     def get_name(cls):
-        return 'bybit'
+        return 'phemex'
 
-    def get_headers(self):
-        return {self.HEADER_FUTURE_KEY: self._get_id()} if self._exchange.exchange_manager.is_future else {}
+    def _get_order_custom_id(self):
+        return f"{self._get_id()}{self._exchange.connector.client.uuid16()}"
 
     def get_orders_parameters(self, params=None) -> dict:
-        if self._exchange.connector.client.options.get("brokerId", None) != self._get_id():
+        if self._exchange.connector.client.options.get("brokerId", "") != self._get_id():
             self._exchange.connector.client.options["brokerId"] = self._get_id()
         return super().get_orders_parameters(params)
-
-    async def _inner_is_valid_account(self) -> (bool, str):
-        # Nothing to do
-        return await super()._inner_is_valid_account()
